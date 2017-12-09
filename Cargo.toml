@@ -1,6 +1,6 @@
 [package]
 name = "utf16-ext"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["LFalch <lucas@wasd.dk>"]
 description = "Extensions for reading and writing utf-16"
 repository = "https://github.com/LFalch/utf16-ext"
