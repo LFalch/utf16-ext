@@ -1,6 +1,16 @@
 use *;
 use byteorder::{LE, BE};
 
+use std::io::{Error, ErrorKind};
+
+/// A writer that will store whether to write in little or big endian
+pub enum AutoWriter<W> {
+    /// Little endian writer
+    Little(W),
+    /// Big endian writer
+    Big(W)
+}
+
 /// A reader that will store whether to read in little or big endian
 pub enum AutoEndianReader<R> {
     /// Little endian reader
@@ -136,6 +146,40 @@ impl<R: Utf16ReadExt> Iterator for AutoEndianLines<R> {
         match *self {
             AutoEndianLines::Little(ref mut r) => r.next(),
             AutoEndianLines::Big(ref mut r) => r.next(),
+        }
+    }
+}
+
+impl<W: Utf16WriteExt> AutoWriter<W> {
+    /// Writes a BOM in the writer and returns a new `AutoWriter` in little endian
+    pub fn new_little(mut writer: W) -> Result<Self, Error> {
+        writer.write_bom::<LE>()?;
+        Ok(AutoWriter::Little(writer))
+    }
+    /// Writes a BOM in the writer and returns a new `AutoWriter` in big endian
+    pub fn new_big(mut writer: W) -> Result<Self, Error> {
+        writer.write_bom::<BE>()?;
+        Ok(AutoWriter::Big(writer))
+    }
+    /// Mirror of `Utf16WriteExt::write_shorts` without the type parameter for endianness
+    pub fn write_shorts(&mut self, buf: &[u16]) -> Result<usize, Error> {
+        match *self {
+            AutoWriter::Little(ref mut w) => w.write_shorts::<LE>(buf),
+            AutoWriter::Big(ref mut w) => w.write_shorts::<BE>(buf)
+        }
+    }
+    /// Mirror of `Utf16WriteExt::write_all_shorts` without the type parameter for endianness
+    pub fn write_all_shorts(&mut self, buf: &[u16]) -> Result<(), Error> {
+        match *self {
+            AutoWriter::Little(ref mut w) => w.write_all_shorts::<LE>(buf),
+            AutoWriter::Big(ref mut w) => w.write_all_shorts::<BE>(buf)
+        }
+    }
+    /// Mirror of `Utf16WriteExt::write_utf16_string` without the type parameter for endianness
+    pub fn write_utf16_string<'a>(&mut self, s: &'a str) -> Result<Utf16Written<'a>, Error> {
+        match *self {
+            AutoWriter::Little(ref mut w) => w.write_utf16_string::<LE>(s),
+            AutoWriter::Big(ref mut w) => w.write_utf16_string::<BE>(s)
         }
     }
 }

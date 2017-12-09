@@ -10,7 +10,6 @@ readme = "README.md"
 categories = ["text-processing"]
 keywords = ["utf16", "io"]
 license = "MIT"
-license-file = "LICENCE"
 exclude = [
     ".gitignore",
     ".travis.yml",
