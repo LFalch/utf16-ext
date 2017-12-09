@@ -1,0 +1,21 @@
+language: rust
+sudo: false
+cache: cargo
+rust:
+- stable
+- nightly
+matrix:
+  allow_failures:
+  - rust: nightly
+env:
+  global:
+    secure: hwPDQGb46BeDV7b/0JhDReeEySkx7TZUPv67ZPcsk5PPwnlHCEpp9CrAtD4QUkdu2KuI3k3qT5KGSPdcPt5paTe4hSuxBc/zk7wWieJ0JxYCjgoXACW9U1LByBOcQa2l5KA6jDm3ulPYhqXgJezGpDd1CgGcR2F7UWMu+hA63rCqiw9YMMzGODwv83nDO9U681l9lTE1XlZFWtAo/7EDnyz1ogdBAxALq3iXq8Isjlm8tdMimTUh5l6ySetasgLA1EuH9NLY7EsZloLtJ50SNLxszs3UCLIDjhsaJDfwf8ZBjjEDDFvj5/q7AAQZiMyqwi9ZXbHNHmkrEDpWvgb40YIKobUvLyJoAMYKmwMKzCh68dRJBnzc0y2/HyYgoK2lGfqj1kWrJxNDTZstJhdO9xivOnfCKn5tt7vr+RLegH0J47lJUocO1TjnM6HvD74u2tuLKOQD4KI4Dd8571AKGcq5mDBUY0/ey7qCsy3BVotqzyAlyldAcZjei6Rr4UhmhytujX0lOqoIM66QaILRfstoiklOTIVwNeMkgfBmmhKY+3dw+6mBu7uBqoL0fVq/L9hIIYnxxdcXhCW7Xn1W/RHzQy9WUGiZLkFaqiSlK07+lNUCerhRm1AX4GFoOybI8tB9nZhioE2enn4Z5Z/Vh87uuzZ93IbnNCXxNo4TQ7Y=
+script:
+- cargo build --verbose
+- cargo test --verbose
+after_success:
+- |
+  [ $TRAVIS_RUST_VERSION = stable ] &&
+  [ $TRAVIS_BRANCH = master ] &&
+  [ $TRAVIS_PULL_REQUEST = false ] &&
+  cargo publish --token ${CRATESIO_TOKEN}
