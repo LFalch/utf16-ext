@@ -64,7 +64,6 @@ impl<R: Utf16ReadExt> AutoEndianReader<R> {
     /// If the value isn't a valid bom (U+FEFF), an error is thrown
     pub fn new_auto_bom(mut inner: R) -> Result<Self, Error> {
         let bom = inner.read_u16::<LE>()?;
-        println!("Bom: {:4x}", bom);
         match bom {
             0xfeff => Ok(AutoEndianReader::Little(inner)),
             0xfffe => Ok(AutoEndianReader::Big(inner)),
