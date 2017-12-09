@@ -12,14 +12,24 @@ pub use auto::*;
 
 /// Extension to the `Read` trait
 pub trait Utf16ReadExt: ReadBytesExt {
+    /// Transforms this instance into an `Iterator` over its u16-units (shorts).
+    ///
+    /// The returned type implements `Iterator` where the `Item` is `Result<u16, R::Err>`.
+    /// The yielded item is `Ok` if a short was successfully read and `Err` otherwise.
+    /// EOF is mapped to returning `None` from this iterator.
     fn shorts<T: ByteOrder>(self) -> Shorts<T, Self>
     where Self: Sized {
         Shorts(PhantomData, self)
     }
+    /// Transforms this instance into an `Iterator` over `char`s from utf-16.
+    ///
+    /// The returned type implements `Iterator` where the `Item` is `Result<char, R::Err>`.
     fn utf16_chars<T: ByteOrder>(self) -> Chars<T, Self>
     where Self: Sized {
         Chars(PhantomData, self)
     }
+    /// Reads all chars (from utf16) until a newline is reached (U+000A) and
+    /// appends them to the provided buffer.
     fn read_utf16_line<T: ByteOrder>(&mut self, buf: &mut String) -> Result<usize, Error> {
         let mut len = 0;
         for c in self.utf16_chars::<T>() {
@@ -39,6 +49,9 @@ pub trait Utf16ReadExt: ReadBytesExt {
         }
         Ok(len)
     }
+    /// Returns an iterator over the lines of this reader.
+    ///
+    /// Like the normal `BufRead::lines`, newlines characters aren't included
     fn utf16_lines<T: ByteOrder>(self) -> Lines<T, Self>
     where Self: Sized {
         Lines(PhantomData, self)
@@ -50,8 +63,10 @@ impl<T: Read> Utf16ReadExt for T {}
 use std::marker::PhantomData;
 
 #[derive(Debug)]
+/// An iterator over `u16` values of a reader.
 pub struct Shorts<T: ByteOrder, R>(PhantomData<T>, R);
 #[derive(Debug)]
+/// An iterator over `char` values of a utf-16 reader.
 pub struct Chars<T: ByteOrder, R>(PhantomData<T>, R);
 
 impl<T: ByteOrder, R: Utf16ReadExt> Iterator for Shorts<T, R> {
@@ -96,6 +111,7 @@ impl<T: ByteOrder, R: Utf16ReadExt> Iterator for Chars<T, R> {
 }
 
 #[derive(Debug)]
+/// An iterator over the lines of a reader (reading utf-16)
 pub struct Lines<T: ByteOrder, B>(PhantomData<T>, B);
 
 impl<T: ByteOrder, B: Utf16ReadExt> Iterator for Lines<T, B> {
